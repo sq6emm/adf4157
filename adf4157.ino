@@ -3,7 +3,7 @@ bool debug = false;
 const double tRFout[]     =  { 5800000000.0, 796000000.0, 1296800000.0, 1296785000.0,  2592196250.0,  2592196150.0 };
 const uint32_t tR0[]      =  {            0,           0,            0,            0,    0x3040CE08,    0x3040CE08 };
 const uint32_t tR1[]      =  {            0,           0,            0,            0,     0xCAC0001,     0xC580001 };
-const uint32_t tR2[]      =  {            0,           0,            0,            0,     0xD508002,     0xD508002 };
+const uint32_t tR2[]      =  {            0,           0,            0,            0,     0xD108002,     0xD108002 };
 const uint32_t tR3[]      =  {            0,           0,            0,            0,          0x43,          0x43 };
 const uint32_t tR4[]      =  {            0,           0,            0,            0,           0x4,           0x4 };
 const uint  tREFin[]      =  {     10000000,    10000000,     10000000,     10000000,      10000000,      10000000 };
@@ -11,6 +11,7 @@ const uint tRefDouble[]   =  {            0,           0,            0,         
 const uint tRCounter[]    =  {            1,           1,            1,            1,             1,             1 };
 const uint tRefDivBy2[]   =  {            0,           0,            0,            0,             0,             0 };
 const uint tMuxout[]      =  {            0,           0,            0,            0,             6,             6 };
+const uint tChargePump[]  =  {            0,           0,            0,            0,            13,            13 };
 const bool tPD[]          =  {            0,           0,            0,            0,             0,             0 };
 
 void adf4157(
@@ -20,7 +21,8 @@ void adf4157(
   unsigned int RCounter,
   unsigned int RefDivBy2,
   unsigned int Muxout,
-  bool PD
+  bool PD,
+  unsigned int ChargePump
   ) {
 
   // values hardset
@@ -32,6 +34,10 @@ void adf4157(
   const bool SDRst = 0; // 0 (Enabled) or 1 (Disabled)
   const bool LDP = 0; // 0 (24 PFD Cycles) or 1 (40 PFD Cycles)
   const bool PDPol = 1; // 0 (Negative) or 1 (Positive)
+  const bool CSR = 0; // 0 (Disabled) or 1 (Enabled)
+
+  // values with automatic calculation
+  bool Prescaler = 0;  if ( RFout > 3000000000 ) Prescaler = 1;
   
   double realRFout = 0.0;  // real output frequency 5802 MHz
   double N = 0.0; // integer division factor
@@ -62,11 +68,11 @@ void adf4157(
   }
 
   uint32_t R0,R1,R2,R3,R4;
-  R0 = (0x0<<31)|((Muxout)<<27)|((INT)<<15)|((fMSB)<<3)|(0x0<<2)|(0x0<<1)|(0x0<<0); // Done
-  R1 = (0x0<<31)|(0x0<<30)|(0x0<<29)|(0x0<<28)|((fLSB)<<15)|(0x0<<2)|(0x0<<1)|(0x1<<0); // Done
-  R2 = (0x0<<31)|(0x0<<30)|(0x0<<29)|(0x0<<28)|((RCounter*2)<<15)|(0x0<<2)|(0x1<<1)|(0x0<<0); // In progress
-  R3 = (0x0<<31)|((SDRst)<<14)|((LDP)<<7)|((PDPol)<<6)|((PD)<<5)|((CP3St)<<4)|((CounterRst)<<3)|(0x0<<2)|(0x1<<1)|(0x1<<0); // In progress
-  R4 = (0x0<<31)|((NegBleedCur)<<23)|((ClckDivMode)<<19)|((ClckDivVal)<<7)|(0x1<<2)|(0x0<<1)|(0x0<<0); // Done
+  R0 = (0x0<<31)|((Muxout)<<27)|((INT)<<15)|((fMSB)<<3)|(0<<0); // Done
+  R1 = (0x0<<31)|(0x0<<30)|(0x0<<29)|(0x0<<28)|((fLSB)<<15)|(1<<0); // Done
+  R2 = (0x0<<31)|((CSR)<<28)|((ChargePump)<<24)|((Prescaler)<<22)|((RefDivBy2)<<21)|((RefDouble)<<20)|((RCounter)<<15)|(2<<0); // Done
+  R3 = (0x0<<31)|((SDRst)<<14)|((LDP)<<7)|((PDPol)<<6)|((PD)<<5)|((CP3St)<<4)|((CounterRst)<<3)|(3<<0); // Done
+  R4 = (0x0<<31)|((NegBleedCur)<<23)|((ClckDivMode)<<19)|((ClckDivVal)<<7)|(4<<0); // Done
 
   Serial.print("Freq: ");  Serial.print(bigPrint(RFout));  Serial.print("Hz ");
   double realFreq = fPFD*(INT + (FRAC/pow(2,25)));
@@ -89,7 +95,7 @@ void setup() {
   Serial.println("===============================");
 
   for (int i=0; i<sizeof tRFout/sizeof tRFout[0]; i++) {
-    adf4157(tRFout[i], tREFin[i], tRefDouble[i], tRCounter[i], tRefDivBy2[i], tMuxout[i], tPD[i]);
+    adf4157(tRFout[i], tREFin[i], tRefDouble[i], tRCounter[i], tRefDivBy2[i], tMuxout[i], tPD[i], tChargePump[i]);
     Serial.print("Expected: "); Serial.print(tR0[i], HEX); Serial.print(" ");
     Serial.print(tR1[i], HEX); Serial.print(" "); Serial.print(tR2[i], HEX); Serial.print(" ");
     Serial.print(tR3[i], HEX); Serial.print(" "); Serial.println(tR4[i], HEX);
