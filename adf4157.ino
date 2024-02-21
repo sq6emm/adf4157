@@ -1,18 +1,18 @@
 bool debug = false;
 
-const double tRFout[]     =  { 5432123456.789, 1234567890.0, 1296785117.1875, 1296785000.0,  2592196250.0,  2592196150.0 };
-const uint32_t tR0[]      =  {      0x10F9B28,    0x3DBA78,        0x40D6D8,     0x40D6D8,    0x3040CE08,    0x3040CE08 };
-const uint32_t tR1[]      =  {      0xC498001,    0x1F8001,       0x2F18001,    0x22D0001,     0xCAC0001,     0xC580001 };
-const uint32_t tR2[]      =  {      0x7408002,   0x7008002,       0x7008002,    0x7008002,     0xD108002,     0xD108002 };
-const uint32_t tR3[]      =  {           0x43,        0x43,            0x43,         0x43,          0x43,          0x43 };
-const uint32_t tR4[]      =  {            0x4,         0x4,             0x4,          0x4,           0x4,           0x4 };
-const uint  tREFin[]      =  {       10000000,    10000000,        10000000,     10000000,      10000000,      10000000 };
-const uint tRefDouble[]   =  {              0,           0,               0,            0,             1,             1 };
-const uint tRCounter[]    =  {              1,           1,               1,            1,             1,             1 };
-const uint tRefDivBy2[]   =  {              0,           0,               0,            0,             0,             0 };
-const uint tMuxout[]      =  {              0,           0,               0,            0,             6,             6 };
-const uint tChargePump[]  =  {              7,           7,               7,            7,            13,            13 };
-const bool tPD[]          =  {              0,           0,               0,            0,             0,             0 };
+const double tRFout[]     =  { 5432123456.789, 1234567890.0,  1296785117.1875, 1296785000.0,  2592196250.0,  2592196150.0 };
+const uint32_t tR0[]      =  {      0x10F9B28,     0x3DBA78,         0x40D6D8,     0x40D6D8,    0x3040CE08,    0x3040CE08 };
+const uint32_t tR1[]      =  {      0xC498001,     0x1F8001,        0x2F18001,    0x22D0001,     0xCAC0001,     0xC580001 };
+const uint32_t tR2[]      =  {      0x7408002,    0x7008002,        0x7008002,    0x7008002,     0xD108002,     0xD108002 };
+const uint32_t tR3[]      =  {           0x43,         0x43,             0x43,         0x43,          0x43,          0x43 };
+const uint32_t tR4[]      =  {            0x4,          0x4,              0x4,          0x4,           0x4,           0x4 };
+const uint  tREFin[]      =  {       10000000,     10000000,         10000000,     10000000,      10000000,      10000000 };
+const uint tRefDouble[]   =  {              0,            0,                0,            0,             1,             1 };
+const uint tRCounter[]    =  {              1,            1,                1,            1,             1,             1 };
+const uint tRefDivBy2[]   =  {              0,            0,                0,            0,             0,             0 };
+const uint tMuxout[]      =  {              0,            0,                0,            0,             6,             6 };
+const uint tChargePump[]  =  {              7,            7,                7,            7,            13,            13 };
+const bool tPD[]          =  {              0,            0,                0,            0,             0,             0 };
 
 void adf4157(
   double RFout, 
