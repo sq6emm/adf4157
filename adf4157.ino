@@ -1,18 +1,18 @@
 bool debug = false;
 
-const double tRFout[]     =  { 5800000000.0, 796000000.0, 1296800000.0, 1296785000.0,  2592196250.0,  2592196150.0 };
-const uint32_t tR0[]      =  {            0,           0,            0,            0,    0x3040CE08,    0x3040CE08 };
-const uint32_t tR1[]      =  {            0,           0,            0,            0,     0xCAC0001,     0xC580001 };
-const uint32_t tR2[]      =  {            0,           0,            0,            0,     0xD108002,     0xD108002 };
-const uint32_t tR3[]      =  {            0,           0,            0,            0,          0x43,          0x43 };
-const uint32_t tR4[]      =  {            0,           0,            0,            0,           0x4,           0x4 };
-const uint  tREFin[]      =  {     10000000,    10000000,     10000000,     10000000,      10000000,      10000000 };
-const uint tRefDouble[]   =  {            0,           0,            0,            0,             1,             1 };
-const uint tRCounter[]    =  {            1,           1,            1,            1,             1,             1 };
-const uint tRefDivBy2[]   =  {            0,           0,            0,            0,             0,             0 };
-const uint tMuxout[]      =  {            0,           0,            0,            0,             6,             6 };
-const uint tChargePump[]  =  {            0,           0,            0,            0,            13,            13 };
-const bool tPD[]          =  {            0,           0,            0,            0,             0,             0 };
+const double tRFout[]     =  { 5432123456.789, 1234567890.0, 1296785117.1875, 1296785000.0,  2592196250.0,  2592196150.0 };
+const uint32_t tR0[]      =  {      0x10F9B28,    0x3DBA78,        0x40D6D8,     0x40D6D8,    0x3040CE08,    0x3040CE08 };
+const uint32_t tR1[]      =  {      0xC498001,    0x1F8001,       0x2F18001,    0x22D0001,     0xCAC0001,     0xC580001 };
+const uint32_t tR2[]      =  {      0x7408002,   0x7008002,       0x7008002,    0x7008002,     0xD108002,     0xD108002 };
+const uint32_t tR3[]      =  {           0x43,        0x43,            0x43,         0x43,          0x43,          0x43 };
+const uint32_t tR4[]      =  {            0x4,         0x4,             0x4,          0x4,           0x4,           0x4 };
+const uint  tREFin[]      =  {       10000000,    10000000,        10000000,     10000000,      10000000,      10000000 };
+const uint tRefDouble[]   =  {              0,           0,               0,            0,             1,             1 };
+const uint tRCounter[]    =  {              1,           1,               1,            1,             1,             1 };
+const uint tRefDivBy2[]   =  {              0,           0,               0,            0,             0,             0 };
+const uint tMuxout[]      =  {              0,           0,               0,            0,             6,             6 };
+const uint tChargePump[]  =  {              7,           7,               7,            7,            13,            13 };
+const bool tPD[]          =  {              0,           0,               0,            0,             0,             0 };
 
 void adf4157(
   double RFout, 
@@ -22,7 +22,7 @@ void adf4157(
   unsigned int RefDivBy2,
   unsigned int Muxout,
   bool PD,
-  unsigned int ChargePump
+  unsigned int ChargePump // 2.50mA decimal 7
   ) {
 
   // values hardset
@@ -53,7 +53,7 @@ void adf4157(
   INT = (int)N;
   double fxSB = ((RFout/fPFD) - INT) * pow(2,12);
   fMSB = (int)fxSB;
-  fLSB = floor(((fxSB - fMSB) * pow(2,13)));
+  fLSB = round(((fxSB - fMSB) * pow(2,13)));
   FRAC = fLSB + fMSB * pow(2,13);
   
   if (debug) {
@@ -67,7 +67,7 @@ void adf4157(
     Serial.print("FRAC: ");  Serial.println(FRAC);
   }
 
-  uint32_t R0,R1,R2,R3,R4;
+  uint32_t R0=0,R1=0,R2=0,R3=0,R4=0;
   R0 = (0x0<<31)|((Muxout)<<27)|((INT)<<15)|((fMSB)<<3)|(0<<0); // Done
   R1 = (0x0<<31)|(0x0<<30)|(0x0<<29)|(0x0<<28)|((fLSB)<<15)|(1<<0); // Done
   R2 = (0x0<<31)|((CSR)<<28)|((ChargePump)<<24)|((Prescaler)<<22)|((RefDivBy2)<<21)|((RefDouble)<<20)|((RCounter)<<15)|(2<<0); // Done
@@ -96,7 +96,7 @@ void setup() {
 
   for (int i=0; i<sizeof tRFout/sizeof tRFout[0]; i++) {
     adf4157(tRFout[i], tREFin[i], tRefDouble[i], tRCounter[i], tRefDivBy2[i], tMuxout[i], tPD[i], tChargePump[i]);
-    Serial.print("Expected: "); Serial.print(tR0[i], HEX); Serial.print(" ");
+    Serial.print("Expected:  "); Serial.print(tR0[i], HEX); Serial.print(" ");
     Serial.print(tR1[i], HEX); Serial.print(" "); Serial.print(tR2[i], HEX); Serial.print(" ");
     Serial.print(tR3[i], HEX); Serial.print(" "); Serial.println(tR4[i], HEX);
   }
