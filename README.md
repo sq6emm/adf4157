@@ -1,4 +1,4 @@
-Work in progress on library to prepare adf4157 registry values.
+Library for ADF4157 that includes registry calculation and write to the chip.
 
 --
 Datasheet:
