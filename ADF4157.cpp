@@ -75,39 +75,42 @@ void ADF4157::WriteRegister(const uint32_t value)
 ADF4157::regs ADF4157::Prepare(double RFout)
 {
   // values hardset
-  const unsigned int ClckDivVal = 0; // 0 - 4095
-  const bool ClckDivMode = 0; // 0 (*Off) or 1 (On) - Enables switched R fastlock
-  const unsigned int NegBleedCur = 0; // 0 (*Off) or 3 (Switched R FastLock Enabled) - Negative Bleed Current
-  const bool CounterRst = 0; // 0 (*Disabled) or 1 (Enabled)
-  const bool CP3St = 0; // 0 (*Disabled) or 1 (Enabled) - Charge Pump Three-State
-  const bool SDRst = 0; // 0 (*Enabled) or 1 (Disabled)
-  const bool LDP = 0; // 0 (*24 PFD Cycles) or 1 (40 PFD Cycles) - Lock Detect Precision
-  const bool PDPol = 1; // 0 (Negative) or 1 (*Positive) - Phase Detector Polarity
-  const bool CSR = 0; // 0 (*Disabled) or 1 (Enabled) - Cycle Slip Reduction
-  const unsigned int Muxout = 6;
-  const unsigned int ChargePump = 13; // set it to 7mA for DF9NP design
-  bool Prescaler = 0; if ( RFout > 3000000000 ) Prescaler = 1; // either 4/5 (0) or 8/9 (1)
-  const unsigned int RCounter = 1;
-  const unsigned int RefDivBy2 = 0;
-  const bool PD = 0;
-  const unsigned int REFin = 10000000; // usual 10MHz GPSDO, OCXO input
-  const bool RefDouble = 1; // double the REFin in order to improve phase noise
+  // NOTE: these must stay uint32_t (not int/unsigned int/bool) - on AVR targets
+  // (e.g. Uno) int is only 16 bits, which silently truncates values like REFin
+  // and overflows the register shifts below (verified fine on ESP32's 32-bit int).
+  const uint32_t ClckDivVal = 0; // 0 - 4095
+  const uint32_t ClckDivMode = 0; // 0 (*Off) or 1 (On) - Enables switched R fastlock
+  const uint32_t NegBleedCur = 0; // 0 (*Off) or 3 (Switched R FastLock Enabled) - Negative Bleed Current
+  const uint32_t CounterRst = 0; // 0 (*Disabled) or 1 (Enabled)
+  const uint32_t CP3St = 0; // 0 (*Disabled) or 1 (Enabled) - Charge Pump Three-State
+  const uint32_t SDRst = 0; // 0 (*Enabled) or 1 (Disabled)
+  const uint32_t LDP = 0; // 0 (*24 PFD Cycles) or 1 (40 PFD Cycles) - Lock Detect Precision
+  const uint32_t PDPol = 1; // 0 (Negative) or 1 (*Positive) - Phase Detector Polarity
+  const uint32_t CSR = 0; // 0 (*Disabled) or 1 (Enabled) - Cycle Slip Reduction
+  const uint32_t Muxout = 6;
+  const uint32_t ChargePump = 13; // set it to 7mA for DF9NP design
+  uint32_t Prescaler = 0; if ( RFout > 3000000000 ) Prescaler = 1; // either 4/5 (0) or 8/9 (1)
+  const uint32_t RCounter = 1;
+  const uint32_t RefDivBy2 = 0;
+  const uint32_t PD = 0;
+  const uint32_t REFin = 10000000UL; // usual 10MHz GPSDO, OCXO input
+  const uint32_t RefDouble = 1; // double the REFin in order to improve phase noise
 
   double fPFD = REFin*((1.0 + RefDouble) / (RCounter * (1.0 + RefDivBy2)));
 
   double N = RFout/fPFD; // integer division factor
-  unsigned int INT = (int)N; // must be between 23 and 4095
+  uint32_t INT = (uint32_t)N; // must be between 23 and 4095
   double fxSB = ((RFout/fPFD) - INT) * pow(2,12);
-  int fMSB = (int)fxSB;
-  int fLSB = round(((fxSB - fMSB) * pow(2,13)));
-  
+  uint32_t fMSB = (uint32_t)fxSB;
+  uint32_t fLSB = (uint32_t)round(((fxSB - fMSB) * pow(2,13)));
+
   regs aregs;
 
-  aregs.array[0] = (0x0<<31)|((Muxout)<<27)|((INT)<<15)|((fMSB)<<3)|(0<<0); // Done
-  aregs.array[1] = (0x0<<31)|(0x0<<30)|(0x0<<29)|(0x0<<28)|((fLSB)<<15)|(1<<0); // Done
-  aregs.array[2] = (0x0<<31)|((CSR)<<28)|((ChargePump)<<24)|((Prescaler)<<22)|((RefDivBy2)<<21)|((RefDouble)<<20)|((RCounter)<<15)|(2<<0); // Done
-  aregs.array[3] = (0x0<<31)|((SDRst)<<14)|((LDP)<<7)|((PDPol)<<6)|((PD)<<5)|((CP3St)<<4)|((CounterRst)<<3)|(3<<0); // Done
-  aregs.array[4] = (0x0<<31)|((NegBleedCur)<<23)|((ClckDivMode)<<19)|((ClckDivVal)<<7)|(4<<0); // Done
+  aregs.array[0] = (0UL<<31)|(Muxout<<27)|(INT<<15)|(fMSB<<3)|(0UL<<0); // Done
+  aregs.array[1] = (0UL<<31)|(0UL<<30)|(0UL<<29)|(0UL<<28)|(fLSB<<15)|(1UL<<0); // Done
+  aregs.array[2] = (0UL<<31)|(CSR<<28)|(ChargePump<<24)|(Prescaler<<22)|(RefDivBy2<<21)|(RefDouble<<20)|(RCounter<<15)|(2UL<<0); // Done
+  aregs.array[3] = (0UL<<31)|(SDRst<<14)|(LDP<<7)|(PDPol<<6)|(PD<<5)|(CP3St<<4)|(CounterRst<<3)|(3UL<<0); // Done
+  aregs.array[4] = (0UL<<31)|(NegBleedCur<<23)|(ClckDivMode<<19)|(ClckDivVal<<7)|(4UL<<0); // Done
 
   return aregs;
 }
