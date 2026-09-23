@@ -88,7 +88,7 @@ ADF4157::regs ADF4157::Prepare(double RFout)
   const uint32_t PDPol = 1; // 0 (Negative) or 1 (*Positive) - Phase Detector Polarity
   const uint32_t CSR = 0; // 0 (*Disabled) or 1 (Enabled) - Cycle Slip Reduction
   const uint32_t Muxout = 6;
-  const uint32_t ChargePump = 13; // set it to 7mA for DF9NP design
+  const uint32_t ChargePump = 13; // ICP = (code+1)/16 * 25.5V/RSET; DF9NP board (RSET 2.7k): 13 = ~8.3mA, 11 = ~7.1mA
   uint32_t Prescaler = 0; if ( RFout > 3000000000 ) Prescaler = 1; // either 4/5 (0) or 8/9 (1)
   const uint32_t RCounter = 1;
   const uint32_t RefDivBy2 = 0;
