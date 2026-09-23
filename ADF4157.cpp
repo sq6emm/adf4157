@@ -100,9 +100,14 @@ ADF4157::regs ADF4157::Prepare(double RFout)
 
   double N = RFout/fPFD; // integer division factor
   uint32_t INT = (uint32_t)N; // must be between 23 and 4095
-  double fxSB = ((RFout/fPFD) - INT) * pow(2,12);
-  uint32_t fMSB = (uint32_t)fxSB;
-  uint32_t fLSB = (uint32_t)round(((fxSB - fMSB) * pow(2,13)));
+  // Round the whole 25-bit fraction once (carrying into INT), then split it
+  // into the 12-bit MSB (R0) and 13-bit LSB (R1). Rounding the LSB part on
+  // its own could yield 8192, overflowing into R1's reserved bits and leaving
+  // the output one MSB step (fPFD/4096, ~4.9 kHz) low.
+  uint32_t frac = (uint32_t)round((N - INT) * 33554432.0); // 2^25
+  if (frac == 33554432UL) { INT++; frac = 0; }
+  uint32_t fMSB = frac >> 13;
+  uint32_t fLSB = frac & 0x1FFF;
 
   regs aregs;
 
